@@ -1,5 +1,7 @@
 # LightX2V-Skills
 
+[中文](README.zh-CN.md)
+
 Agent skills for **LightX2V** — AI image/video generation via [x2v.light-ai.top](https://x2v.light-ai.top).
 
 **Skills directory:** https://skills.sh/ModelTC/LightX2V-Skills
