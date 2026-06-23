@@ -1,16 +1,16 @@
 ---
-name: lightx2v-cli
+name: lightx2v-ai-video-generation
 description: "Run LightX2V AI generation tasks from the command line via OpenAPI. Commands: lightx2v login, models, run, query, list, cancel, resume, delete, result, completion. Tasks: t2i, t2v, i2v, s2v, flf2v, t2av, i2av, vsr, animate, i2i. Use for: scriptable video/image generation, CI pipelines, agent automation, batch jobs. Triggers: lightx2v cli, lightx2v run, api key generation, text to video cli, text to image cli, download generated video, poll task status"
 allowed-tools: Bash(lightx2v *)
 ---
 
-> **Install skill:** `npx skills add ModelTC/lightx2v-ai-video-generation@lightx2v-cli`
+> **Install skill:** `npx skills add ModelTC/lightx2v-ai-video-generation@lightx2v-ai-video-generation`
 >
 > **Install CLI:** `curl -fsSL https://raw.githubusercontent.com/ModelTC/lightx2v-studio-cli/main/install.sh | sh`
 >
 > **Skills directory:** https://skills.sh/ModelTC/lightx2v-ai-video-generation
 
-# LightX2V CLI
+# LightX2V AI Video Generation
 
 Submit and download AI generation tasks via the LightX2V OpenAPI.
 

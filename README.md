@@ -7,7 +7,7 @@ Agent skills for **LightX2V** — AI image/video generation via [x2v.light-ai.to
 ## Install
 
 ```bash
-npx skills add ModelTC/lightx2v-ai-video-generation@lightx2v-cli -g -y
+npx skills add ModelTC/lightx2v-ai-video-generation@lightx2v-ai-video-generation -g -y
 ```
 
 Install all skills from this repo:
