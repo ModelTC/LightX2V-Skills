@@ -4,11 +4,11 @@ description: "Run LightX2V AI generation tasks from the command line via OpenAPI
 allowed-tools: Bash(lightx2v *)
 ---
 
-> **Install skill:** `npx skills add ModelTC/lightx2v-ai-video-generation@lightx2v-ai-video-generation`
+> **Install skill:** `npx skills add ModelTC/LightX2V-Skills@lightx2v-ai-video-generation`
 >
 > **Install CLI:** `curl -fsSL https://raw.githubusercontent.com/ModelTC/lightx2v-studio-cli/main/install.sh | sh`
 >
-> **Skills directory:** https://skills.sh/ModelTC/lightx2v-ai-video-generation
+> **Skills directory:** https://skills.sh/ModelTC/LightX2V-Skills
 
 # LightX2V AI Video Generation
 
@@ -101,8 +101,8 @@ lightx2v result TASK_ID -o output.png
 
 ## Related
 
-- Skills directory: https://skills.sh/ModelTC/lightx2v-ai-video-generation
-- Skills repo: https://github.com/ModelTC/lightx2v-ai-video-generation
+- Skills directory: https://skills.sh/ModelTC/LightX2V-Skills
+- Skills repo: https://github.com/ModelTC/LightX2V-Skills
 - CLI repo: https://github.com/ModelTC/lightx2v-studio-cli
 - OpenAPI: https://x2v.light-ai.top/openapi.json
 - Platform: https://x2v.light-ai.top

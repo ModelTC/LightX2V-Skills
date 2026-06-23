@@ -1,19 +1,19 @@
-# lightx2v-ai-video-generation
+# LightX2V-Skills
 
 Agent skills for **LightX2V** — AI image/video generation via [x2v.light-ai.top](https://x2v.light-ai.top).
 
-**Skills directory:** https://skills.sh/ModelTC/lightx2v-ai-video-generation
+**Skills directory:** https://skills.sh/ModelTC/LightX2V-Skills
 
 ## Install
 
 ```bash
-npx skills add ModelTC/lightx2v-ai-video-generation@lightx2v-ai-video-generation -g -y
+npx skills add ModelTC/LightX2V-Skills@lightx2v-ai-video-generation -g -y
 ```
 
 Install all skills from this repo:
 
 ```bash
-npx skills add ModelTC/lightx2v-ai-video-generation -g -y
+npx skills add ModelTC/LightX2V-Skills -g -y
 ```
 
 ## CLI
