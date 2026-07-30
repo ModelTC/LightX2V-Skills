@@ -6,6 +6,12 @@ Agent skills for **LightX2V** — AI image/video generation via [x2v.light-ai.to
 
 **Skills directory:** https://skills.sh/ModelTC/LightX2V-Skills
 
+## Skills
+
+| Skill | Use |
+| --- | --- |
+| `lightx2v-ai-video-generation` | Use the `lightx2v` CLI / OpenAPI for image, video, digital-human, audio-video, VSR, animate, TTS, voice clone, and workflow tasks. Includes `references/workflow-nodes.md` and `references/voice-tts.md`. |
+
 ## Install
 
 ```bash

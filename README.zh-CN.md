@@ -6,6 +6,12 @@
 
 **Skills 目录：** https://skills.sh/ModelTC/LightX2V-Skills
 
+## Skills
+
+| Skill | 用途 |
+| --- | --- |
+| `lightx2v-ai-video-generation` | 使用 `lightx2v` CLI / OpenAPI 生成图片、视频、数字人口播、音视频、VSR、动作迁移、TTS、音色克隆和工作流任务。包含 `references/workflow-nodes.md` 和 `references/voice-tts.md`。 |
+
 ## 安装 Skill
 
 ```bash
