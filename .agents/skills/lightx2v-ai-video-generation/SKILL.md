@@ -15,8 +15,9 @@ Use the `lightx2v` CLI to submit LightX2V tasks, poll results, create/run workfl
 3. Discover live models before guessing names: `lightx2v models --json`.
 4. Prefer direct `lightx2v run` for one model task. Use `lightx2v workflow ...` for multi-node graphs, saved user workflows, or generated TTS -> digital-human pipelines.
 5. Before creating or editing workflow JSON, read `references/workflow-nodes.md` for node ids, ports, data fields, and graph patterns.
-6. Before using TTS or voice clone, read `references/voice-tts.md` for voice discovery, parameters, clone commands, and workflow `tts` nodes.
-7. Never print API keys, bearer tokens, or long signed media URLs in shared output.
+6. Before discovering inputs, running, monitoring, or cancelling a saved workflow, read `references/workflow-api.md`.
+7. Before using TTS or voice clone, read `references/voice-tts.md` for voice discovery, parameters, clone commands, and workflow `tts` nodes.
+8. Never print API keys, bearer tokens, or long signed media URLs in shared output.
 
 Install:
 
@@ -31,10 +32,13 @@ curl -fsSL https://raw.githubusercontent.com/ModelTC/lightx2v-studio-cli/main/in
 | List models | `lightx2v models --json` |
 | Submit one generation task | `lightx2v run TASK/MODEL --prompt "..." ...` |
 | Query/download task | `lightx2v query TASK_ID`, `lightx2v result TASK_ID -o out.mp4` |
-| List workflows | `lightx2v workflow list`, `lightx2v workflow list --public` |
+| List owned workflows | `lightx2v workflow list --json` |
 | Inspect/create workflow | `lightx2v workflow get WORKFLOW_ID --json`, `lightx2v workflow create --input @workflow.json --json` |
+| Discover workflow inputs | `lightx2v workflow inputs WORKFLOW_ID --json` |
 | Run workflow | `lightx2v workflow run WORKFLOW_ID --inputs @inputs.json --input-file node_id=./file.png --poll` |
+| Monitor workflow | `lightx2v workflow runs WORKFLOW_ID --status running`, `lightx2v workflow stream WORKFLOW_ID RUN_ID` |
 | Workflow outputs | `lightx2v workflow outputs WORKFLOW_ID RUN_ID --json` |
+| Cancel workflow work | `lightx2v workflow cancel WORKFLOW_ID RUN_ID`, `lightx2v workflow cancel-node WORKFLOW_ID RUN_ID NODE_ID` |
 | TTS | `lightx2v voices`, `lightx2v tts ...`; details in `references/voice-tts.md` |
 | Voice clone | `lightx2v voice-clone create/list/tts/delete ...`; details in `references/voice-tts.md` |
 
@@ -58,6 +62,13 @@ lightx2v run s2v/SekoTalk-V3 \
   --image ./portrait.png \
   --audio ./speech.wav \
   -o avatar.mp4
+
+lightx2v run t2av/MiniMax-H3 \
+  --prompt "A 15-second vertical product film with synchronized sound" \
+  --aspect-ratio 9:16 \
+  --resolution-level 768p \
+  --duration 15 \
+  -o product.mp4
 ```
 
 Common task meanings:
@@ -71,14 +82,40 @@ Common task meanings:
 | `s2v` | image/video + audio | Digital-human/lip-sync |
 | `t2av` | prompt | Text to audio-video |
 | `i2av` | prompt + image(s) | Image/keyframes to audio-video |
+| `ref2av` | prompt + reference image/video/audio | Multi-reference audio-video |
 | `vsr` | video or image | Super-resolution |
 | `animate` | reference image + driving video | Motion transfer |
 
-Important run flags: `--prompt`, `--input JSON|@file.json`, `--image`, `--video`, `--audio`, `--shape H,W`, `--aspect-ratio`, `--duration`, `--quote`, `--json`, `--no-download`, `-o`.
+Important run flags: `--prompt`, `--input JSON|@file.json`, `--image`, `--video`, `--audio`, `--shape H,W`, `--resolution-level`, `--aspect-ratio`, `--duration`, `--quote`, `--json`, `--no-download`, `-o`.
+
+For MiniMax-H3, use `--resolution-level 544p|768p` to select the output tier. If the
+user requests 768P, include `--resolution-level 768p` on every submitted task. Do not
+substitute `--shape 1344,768` for the tier: an omitted `resolution_level` uses the
+platform default (`544p`). Do not claim that MiniMax-H3 is limited to 544P or add a VSR
+step unless the user explicitly requests upscaling.
+
+When writing a batch script against `POST /api/v1/task/submit`, use the same canonical
+fields as the CLI. A MiniMax-H3 768P request looks like this:
+
+```json
+{
+  "task": "t2av",
+  "model_cls": "MiniMax-H3",
+  "prompt": "A 15-second vertical product film with synchronized sound",
+  "aspect_ratio": "9:16",
+  "resolution_level": "768p",
+  "video_duration_seconds": 15
+}
+```
+
+Reuse the exact same model, aspect ratio, resolution tier, duration, and media fields
+for quote and submit. The server derives the compatible pixel canvas (for example,
+9:16 768P becomes `[1344, 768]` in `custom_shape`). Do not infer a downgrade from that
+internal size, and do not omit `resolution_level` after quoting it.
 
 ## Workflow Basics
 
-For workflow creation/editing details, read `references/workflow-nodes.md`. It contains the node catalog, ports, allowed `data` keys, model parameter mapping, and common graph patterns.
+For workflow creation/editing details, read `references/workflow-nodes.md`. For the saved-workflow runtime contract and the complete discover -> run -> monitor -> outputs SOP, read `references/workflow-api.md`.
 
 A workflow is a graph of nodes and connections. Input nodes are special:
 
@@ -87,7 +124,7 @@ A workflow is a graph of nodes and connections. Input nodes are special:
 - `audio-input` emits `out-audio`.
 - `video-input` emits `out-video`.
 
-Run-time values must be passed with `workflow run --inputs`, keyed by input node id. Do not patch an Input node's stored `data.value` just to run once. Use `--save-as-default` only when changing workflow defaults.
+Discover required inputs with `workflow inputs` for the same run scope, then pass run-time values with `workflow run --inputs`, keyed by input node id. Do not patch an Input node's stored `data.value` just to run once. Use `--save-as-default` only when changing workflow defaults.
 
 Text and URL inputs:
 
@@ -166,7 +203,7 @@ lightx2v voice-clone tts --speaker-id SPEAKER_ID --text "你好。" -o cloned.wa
 
 - `401`: API key missing, expired, or route not allowed. Re-run `lightx2v login` or check `LIGHTX2V_API_KEY`.
 - Local `127.0.0.1` request goes through a proxy: set `NO_PROXY=127.0.0.1,localhost no_proxy=127.0.0.1,localhost`.
-- Workflow public run reports missing inputs plus workflow conflict: public workflow inputs may not be persistable for the current user. Fork/create a private workflow and run that.
+- Public/community workflow cannot be run with the account API key: copy or recreate it in the authenticated account first.
 - Workflow run returns before final output: query `lightx2v workflow status WORKFLOW_ID RUN_ID --json`, then `workflow outputs`.
 - TTS fails with a built-in voice: confirm the voice's paired `resource_id` from `lightx2v voices`; see `references/voice-tts.md`.
 - Model name fails: refresh with `lightx2v models --json`; model display names and `model_cls` are not interchangeable.

@@ -10,7 +10,7 @@ Agent skills for **LightX2V** — AI image/video generation via [x2v.light-ai.to
 
 | Skill | Use |
 | --- | --- |
-| `lightx2v-ai-video-generation` | Use the `lightx2v` CLI / OpenAPI for image, video, digital-human, audio-video, VSR, animate, TTS, voice clone, and workflow tasks. Includes `references/workflow-nodes.md` and `references/voice-tts.md`. |
+| `lightx2v-ai-video-generation` | Use the `lightx2v` CLI / OpenAPI for image, video, digital-human, audio-video, VSR, animate, TTS, voice clone, and workflow tasks. Includes `references/workflow-api.md`, `references/workflow-nodes.md`, and `references/voice-tts.md`. |
 
 ## Install
 

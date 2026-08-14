@@ -123,6 +123,11 @@ Example:
 | `video-gen-image-with-audio` | `i2av` | `in-text`, `in-image` | `out-video` | `model`, `aspectRatio`, `resolutionLevel`, `videoDurationSeconds`, `imageKeyframeTimes`, `image_strength`, `i2av_row_order`, `loraStylePlugins` |
 | `video-super-resolution` | `vsr` video slot | `in-video` | `out-video` | `model`, `vsr_preset` |
 
+For MiniMax-H3 nodes, set `resolutionLevel` explicitly when the user requests a tier:
+`544p` or `768p`. Omitting it selects the platform default (`544p`). A custom pixel
+shape is not a substitute for `resolutionLevel`, and 768P does not require a separate
+super-resolution node.
+
 Example image-to-video node:
 
 ```json
