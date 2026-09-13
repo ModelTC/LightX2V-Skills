@@ -1,7 +1,7 @@
 ---
 name: lightx2v-ai-video-generation
 description: Use when generating images, videos, digital humans, audio-video clips, TTS speech, cloned voices, or reusable LightX2V workflows from an agent or command line.
-allowed-tools: Bash(lightx2v *)
+allowed-tools: Bash(lightx2v *) Bash(ffmpeg *) Bash(ffprobe *) Bash(pyannote-audio *) Bash(base64 *) Bash(jq *)
 ---
 
 # LightX2V AI Video Generation
@@ -17,7 +17,8 @@ Use the `lightx2v` CLI to submit LightX2V tasks, poll results, create/run workfl
 5. Before creating or editing workflow JSON, read `references/workflow-nodes.md` for node ids, ports, data fields, and graph patterns.
 6. Before discovering inputs, running, monitoring, or cancelling a saved workflow, read `references/workflow-api.md`.
 7. Before using TTS or voice clone, read `references/voice-tts.md` for voice discovery, parameters, clone commands, and workflow `tts` nodes.
-8. Never print API keys, bearer tokens, or long signed media URLs in shared output.
+8. For multi-person or multi-role S2V, read `references/s2v-multi.md` before preparing masks, role tracks, or a request. Its user-confirmation gate is mandatory.
+9. Never print API keys, bearer tokens, or long signed media URLs in shared output.
 
 Install:
 
@@ -70,6 +71,10 @@ lightx2v run t2av/MiniMax-H3 \
   --duration 15 \
   -o product.mp4
 ```
+
+The example above is single-speaker S2V. For several people in one image, including
+the case where only one selected person should speak, do not use ordinary `--audio`.
+Prepare the mask + role-track directory request described in `references/s2v-multi.md`.
 
 Common task meanings:
 
@@ -196,7 +201,8 @@ lightx2v voice-clone tts --speaker-id SPEAKER_ID --text "你好。" -o cloned.wa
 - Max image upload is usually around `20MB`.
 - Large media is better as URL input than huge base64 JSON.
 - For `i2v` and `s2v`, assume one primary image unless live model metadata says otherwise.
-- Multi-person lip-sync in one image is not a simple API submit; use the web Free Mode workflow if role-track pairing is required.
+- Multi-person S2V uses one group image plus a directory-style `input_audio` containing `config.json`, `original_audio.*`, and one or more paired role tracks and masks. Prefer `SekoTalk-V3-Multi` when live model metadata exposes it.
+- An agent may derive anonymous speaker time ranges with an available diarization tool such as `pyannote-audio`, then prepare masks and full-timeline role tracks locally with FFmpeg. Diarization does not identify which image person owns a voice: show the proposed person/mask/track mapping and obtain explicit user confirmation before creating the final request, quoting, or submitting. If the person region or speaker timing cannot be determined reliably, ask the user or use web Free Mode; never guess the mapping.
 - For `i2av` multi-keyframe, use one wrapper: `{"input_image":{"type":"base64"|"url","data":[...]}}` plus `image_keyframe_times` and `image_strength`. Do not send an array of mixed media wrapper objects unless the live API explicitly supports it.
 
 ## Troubleshooting
