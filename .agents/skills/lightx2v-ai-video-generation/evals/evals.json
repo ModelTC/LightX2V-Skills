@@ -1,0 +1,41 @@
+{
+  "skill_name": "lightx2v-ai-video-generation",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I cannot install or use the lightx2v CLI. Using only direct HTTP, show the complete reliable sequence to discover an image model, quote a t2i request, submit it, poll until terminal, and fetch the image. Mark public versus authenticated endpoints and protect the API key.",
+      "expected_output": "A direct-HTTP sequence that starts from public live discovery, then uses authenticated quote, submit, query, and temporary result URL endpoints without exposing a real key.",
+      "files": [],
+      "assertions": [
+        "Uses /llms.txt or an Agent-readable Markdown entry point before execution",
+        "Queries /api/v1/model/list and task-scoped /api/v1/model/specs before building the request",
+        "Includes quote, submit, query, and result_url with their authentication requirements",
+        "Does not invent, echo, or persist a real API key"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Create an API request plan for a 9:16, 15-second, 768p audio-video generation. I named MiniMax-H3, but do not guess whether those parameters are currently valid. Explain exactly what live endpoints you query and how their response controls the request.",
+      "expected_output": "A plan that treats live model specs as authoritative for model availability and conditional parameters, and OpenAPI as the exact schema source.",
+      "files": [],
+      "assertions": [
+        "Queries model list and /api/v1/model/specs?task=t2av at runtime",
+        "Uses /openapi.json for precise request and response fields",
+        "Does not assert remembered duration, ratio, resolution, or upload limits as current truth",
+        "Keeps quote and submit parameters identical"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "A direct HTTP task submission timed out after sending the body. Explain what to do next so we do not create duplicate work or charges. Cover task identifiers, retry classification for 429/5xx/parameter/balance/permission/content errors, and signed result URLs.",
+      "expected_output": "A bounded recovery procedure that reconciles an existing task before retrying and classifies retryable versus terminal errors.",
+      "files": [],
+      "assertions": [
+        "Queries a known task_id; without one, uses only a live-OpenAPI-documented idempotency mechanism and otherwise stops for manual verification",
+        "Respects Retry-After for 429 and uses limited backoff for transient 5xx",
+        "Does not retry parameter, balance, permission, or content-safety failures unchanged",
+        "Treats signed result URLs as temporary download URLs"
+      ]
+    }
+  ]
+}

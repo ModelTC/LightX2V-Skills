@@ -1,24 +1,23 @@
 ---
 name: lightx2v-ai-video-generation
 description: Use when generating images, videos, digital humans, audio-video clips, TTS speech, cloned voices, or reusable LightX2V workflows from an agent or command line.
-allowed-tools: Bash(lightx2v *) Bash(ffmpeg *) Bash(ffprobe *) Bash(pyannote-audio *) Bash(base64 *) Bash(jq *)
+allowed-tools: Bash(lightx2v *) Bash(curl *) Bash(ffmpeg *) Bash(ffprobe *) Bash(pyannote-audio *) Bash(base64 *) Bash(jq *)
 ---
 
 # LightX2V AI Video Generation
 
-Use the `lightx2v` CLI to submit LightX2V tasks, poll results, create/run workflows, synthesize speech, and manage cloned voices.
+Use the LightX2V CLI or direct HTTP API to submit tasks, poll results, create/run workflows, synthesize speech, and manage cloned voices. The CLI is a convenience layer, not the only supported path.
 
 ## Start Here
 
-1. Authenticate: use `LIGHTX2V_API_KEY`, `LIGHTX2V_CLOUD_API_KEY`, or `lightx2v login`.
-2. Set backend if needed: `LIGHTX2V_BASE_URL=https://x2v.light-ai.top` or a local server such as `http://127.0.0.1:8081`.
-3. Discover live models before guessing names: `lightx2v models --json`.
-4. Prefer direct `lightx2v run` for one model task. Use `lightx2v workflow ...` for multi-node graphs, saved user workflows, or generated TTS -> digital-human pipelines.
-5. Before creating or editing workflow JSON, read `references/workflow-nodes.md` for node ids, ports, data fields, and graph patterns.
-6. Before discovering inputs, running, monitoring, or cancelling a saved workflow, read `references/workflow-api.md`.
-7. Before using TTS or voice clone, read `references/voice-tts.md` for voice discovery, parameters, clone commands, and workflow `tts` nodes.
-8. For multi-person or multi-role S2V, read `references/s2v-multi.md` before preparing masks, role tracks, or a request. Its user-confirmation gate is mandatory.
-9. Never print API keys, bearer tokens, or long signed media URLs in shared output.
+1. Read `https://x2v.light-ai.top/llms.txt` or the linked overview Markdown.
+2. Read the topic page for the requested task. For direct HTTP, read `references/direct-api.md` as the execution checklist.
+3. Query the live model list and task-scoped model specs before choosing a model or parameter. Use `/openapi.json` when exact request or response fields are needed.
+4. Authenticate only when required: use `LIGHTX2V_API_KEY`, `LIGHTX2V_CLOUD_API_KEY`, or `lightx2v login`. Never print, generate, echo, or persist a user's key.
+5. Prefer direct `lightx2v run` for one model task when the CLI is available. Use direct HTTP when requested or when the CLI cannot be installed. Use `lightx2v workflow ...` for multi-node graphs, saved user workflows, or generated TTS -> digital-human pipelines.
+6. Before creating or editing workflow JSON, read `references/workflow-nodes.md`. Before running a saved workflow, read `references/workflow-api.md`.
+7. Before using TTS or voice clone, read `references/voice-tts.md`. For multi-person or multi-role S2V, read `references/s2v-multi.md`; its user-confirmation gate is mandatory.
+8. Treat signed result URLs as temporary download addresses and keep them out of shared output.
 
 Install:
 
@@ -42,6 +41,7 @@ curl -fsSL https://raw.githubusercontent.com/ModelTC/lightx2v-studio-cli/main/in
 | Cancel workflow work | `lightx2v workflow cancel WORKFLOW_ID RUN_ID`, `lightx2v workflow cancel-node WORKFLOW_ID RUN_ID NODE_ID` |
 | TTS | `lightx2v voices`, `lightx2v tts ...`; details in `references/voice-tts.md` |
 | Voice clone | `lightx2v voice-clone create/list/tts/delete ...`; details in `references/voice-tts.md` |
+| Direct HTTP | Read `references/direct-api.md`, then use the live Markdown, model specs, and OpenAPI sources |
 
 ## Direct Generation Tasks
 
@@ -88,7 +88,8 @@ Common task meanings:
 | `t2av` | prompt | Text to audio-video |
 | `i2av` | prompt + image(s) | Image/keyframes to audio-video |
 | `ref2av` | prompt + reference image/video/audio | Multi-reference audio-video |
-| `vsr` | video or image | Super-resolution |
+| `isr` | image | Image super-resolution |
+| `vsr` | video | Video super-resolution |
 | `animate` | reference image + driving video | Motion transfer |
 
 Important run flags: `--prompt`, `--input JSON|@file.json`, `--image`, `--video`, `--audio`, `--shape H,W`, `--resolution-level`, `--aspect-ratio`, `--duration`, `--quote`, `--json`, `--no-download`, `-o`.
@@ -197,8 +198,7 @@ lightx2v voice-clone tts --speaker-id SPEAKER_ID --text "你好。" -o cloned.wa
 ## Key Constraints
 
 - API channel credits may differ from web UI; use `--quote` for expensive jobs.
-- Prompt max length is usually around `5000` characters.
-- Max image upload is usually around `20MB`.
+- Read current prompt, media, duration, dimension, and conditional parameter limits from the selected task's live model spec. Do not reuse remembered limits.
 - Large media is better as URL input than huge base64 JSON.
 - For `i2v` and `s2v`, assume one primary image unless live model metadata says otherwise.
 - Multi-person S2V uses one group image plus a directory-style `input_audio` containing `config.json`, `original_audio.*`, and one or more paired role tracks and masks. Prefer `SekoTalk-V3-Multi` when live model metadata exposes it.
@@ -208,6 +208,9 @@ lightx2v voice-clone tts --speaker-id SPEAKER_ID --text "你好。" -o cloned.wa
 ## Troubleshooting
 
 - `401`: API key missing, expired, or route not allowed. Re-run `lightx2v login` or check `LIGHTX2V_API_KEY`.
+- `429`: respect `Retry-After`; do not run an independent aggressive retry loop.
+- Transient connection failures and `5xx`: use limited exponential backoff with jitter. After an uncertain submission outcome, query the existing `task_id`. If no `task_id` was received and the live OpenAPI exposes no idempotency or reconciliation mechanism, do not automatically resubmit; report the unknown outcome for manual verification.
+- Parameter, balance, permission, and content-safety errors: do not retry unchanged. Correct the request or stop.
 - Local `127.0.0.1` request goes through a proxy: set `NO_PROXY=127.0.0.1,localhost no_proxy=127.0.0.1,localhost`.
 - Public/community workflow cannot be run with the account API key: copy or recreate it in the authenticated account first.
 - Workflow run returns before final output: query `lightx2v workflow status WORKFLOW_ID RUN_ID --json`, then `workflow outputs`.

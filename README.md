@@ -10,7 +10,7 @@ Agent skills for **LightX2V** — AI image/video generation via [x2v.light-ai.to
 
 | Skill | Use |
 | --- | --- |
-| `lightx2v-ai-video-generation` | Use the `lightx2v` CLI / OpenAPI for image, video, digital-human, audio-video, VSR, animate, TTS, voice clone, and workflow tasks. Includes `references/workflow-api.md`, `references/workflow-nodes.md`, and `references/voice-tts.md`. |
+| `lightx2v-ai-video-generation` | Use direct HTTP or the `lightx2v` CLI for image, video, digital-human, audio-video, ISR/VSR, animate, TTS, voice clone, and workflow tasks. Includes live API discovery and execution references. |
 
 ## Install
 
@@ -23,6 +23,18 @@ Install all skills from this repo:
 ```bash
 npx skills add ModelTC/LightX2V-Skills -g -y
 ```
+
+## API sources
+
+- Website: https://x2v.light-ai.top/api-docs
+- Agent index: https://x2v.light-ai.top/llms.txt
+- Agent-readable Markdown: https://x2v.light-ai.top/en/api-docs.md
+- OpenAPI schema: https://x2v.light-ai.top/openapi.json
+- Live model catalog: https://x2v.light-ai.top/api/v1/model/list
+- Task-scoped model specs: `https://x2v.light-ai.top/api/v1/model/specs?task=...`
+- Skill: discovers and combines these sources, then chooses direct HTTP or the CLI.
+
+Live model specs are authoritative for current models and mutable media constraints. OpenAPI defines exact request and response shapes; Markdown explains workflows and recovery behavior.
 
 ## CLI
 
@@ -40,6 +52,7 @@ CLI repo: https://github.com/ModelTC/lightx2v-studio-cli
 
 - Platform: https://x2v.light-ai.top
 - API docs: https://x2v.light-ai.top/api-docs
+- Agent-readable docs: https://x2v.light-ai.top/llms.txt
 - OpenAPI: https://x2v.light-ai.top/openapi.json
 
 ## License
