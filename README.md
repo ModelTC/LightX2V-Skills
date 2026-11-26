@@ -10,7 +10,7 @@ Agent skills for **LightX2V** — AI image/video generation via [x2v.light-ai.to
 
 | Skill | Use |
 | --- | --- |
-| `lightx2v-ai-video-generation` | Use direct HTTP or the `lightx2v` CLI for image, video, digital-human, audio-video, ISR/VSR, animate, TTS, voice clone, and workflow tasks. Includes live API discovery and execution references. |
+| `lightx2v-ai-video-generation` | Use direct HTTP or the `lightx2v` CLI for image, video, digital-human, audio-video, ISR/VSR, animate, TTS, voice clone, and canvas tasks. Includes live API discovery and execution references. |
 
 ## Install
 
@@ -34,7 +34,7 @@ npx skills add ModelTC/LightX2V-Skills -g -y
 - Task-scoped model specs: `https://x2v.light-ai.top/api/v1/model/specs?task=...`
 - Skill: discovers and combines these sources, then chooses direct HTTP or the CLI.
 
-Live model specs are authoritative for current models and mutable media constraints. OpenAPI defines exact request and response shapes; Markdown explains workflows and recovery behavior.
+Live model specs are authoritative for current models and mutable media constraints. OpenAPI defines exact request and response shapes; Markdown explains canvases and recovery behavior.
 
 ## CLI
 

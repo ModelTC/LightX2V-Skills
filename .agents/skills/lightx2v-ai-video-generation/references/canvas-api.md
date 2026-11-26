@@ -1,19 +1,19 @@
-# Saved Workflow API
+# Saved Canvas API
 
-Use this reference when an existing saved workflow should be discovered, inspected, run, monitored, or cancelled through the LightX2V API. For creating or editing workflow graphs, use `workflow-nodes.md` instead.
+Use this reference when an existing saved canvas should be discovered, inspected, run, monitored, or cancelled through the LightX2V API. For creating or editing canvas graphs, use `canvas-nodes.md` instead.
 
 ## Scope And Ownership
 
-- API keys can run workflows owned by the authenticated account.
-- A public/community workflow must first be copied or recreated in that account.
-- A missing workflow and a workflow owned by another user both return `404`.
+- API keys can run canvases owned by the authenticated account.
+- A public/community canvas must first be copied or recreated in that account.
+- A missing canvas and a canvas owned by another user both return `404`.
 - Run-time values belong in `inputs`; do not edit stored Input node values for a one-off run.
-- Use `save_as_default=true` only when the user explicitly wants to update workflow defaults.
+- Use `save_as_default=true` only when the user explicitly wants to update canvas defaults.
 
 ## Recommended Sequence
 
-1. List owned workflows.
-2. Read the selected workflow if graph details are needed.
+1. List owned canvases.
+2. Read the selected canvas if graph details are needed.
 3. Discover required inputs for the intended run scope.
 4. Start the run with values keyed by Input node id.
 5. Poll status or listen to SSE events.
@@ -22,11 +22,11 @@ Use this reference when an existing saved workflow should be discovered, inspect
 CLI:
 
 ```bash
-lightx2v workflow list --json
-lightx2v workflow inputs WORKFLOW_ID --json
-lightx2v workflow run WORKFLOW_ID --inputs @inputs.json --json
-lightx2v workflow stream WORKFLOW_ID RUN_ID --json
-lightx2v workflow outputs WORKFLOW_ID RUN_ID --json
+lightx2v canvas list --json
+lightx2v canvas inputs CANVAS_ID --json
+lightx2v canvas run CANVAS_ID --inputs @inputs.json --json
+lightx2v canvas stream CANVAS_ID RUN_ID --json
+lightx2v canvas outputs CANVAS_ID RUN_ID --json
 ```
 
 HTTP equivalents:
@@ -51,7 +51,7 @@ Authenticate direct requests with `Authorization: Bearer apikey_...`. Never prin
 Input requirements depend on the selected run scope:
 
 ```bash
-lightx2v workflow inputs WORKFLOW_ID \
+lightx2v canvas inputs CANVAS_ID \
   --mode downstream \
   --node-id TARGET_NODE_ID \
   --json
@@ -85,7 +85,7 @@ Each returned input includes `node_id`, `type`, `required`, `default_preview`, a
 With the CLI, local media can be bound without manually creating base64:
 
 ```bash
-lightx2v workflow run WORKFLOW_ID \
+lightx2v canvas run CANVAS_ID \
   --inputs '{"prompt_input":"A clean studio product reveal"}' \
   --input-file reference_image=./product.jpg \
   --poll \
@@ -97,7 +97,7 @@ lightx2v workflow run WORKFLOW_ID \
 Use the same `mode`, `node_ids`, and `include_upstream` values for both input discovery and run submission. Otherwise the discovered required inputs may not match the actual run.
 
 ```bash
-lightx2v workflow run WORKFLOW_ID \
+lightx2v canvas run CANVAS_ID \
   --mode downstream \
   --node-id TARGET_NODE_ID \
   --inputs @inputs.json \
@@ -110,13 +110,13 @@ Choose one monitoring strategy:
 
 ```bash
 # Poll a run
-lightx2v workflow status WORKFLOW_ID RUN_ID --json
+lightx2v canvas status CANVAS_ID RUN_ID --json
 
 # Stream run_status and run_outputs events
-lightx2v workflow stream WORKFLOW_ID RUN_ID --json
+lightx2v canvas stream CANVAS_ID RUN_ID --json
 
 # List active runs after reconnecting
-lightx2v workflow runs WORKFLOW_ID --status running --json
+lightx2v canvas runs CANVAS_ID --status running --json
 ```
 
 Terminal statuses are `succeeded`, `failed`, and `cancelled`. Calling `outputs` before then is valid and returns `pending: true` with an empty output list.
@@ -128,13 +128,13 @@ Final output items identify the source `node_id`, `port_id`, and `kind`. Media o
 Cancel a whole run:
 
 ```bash
-lightx2v workflow cancel WORKFLOW_ID RUN_ID --json
+lightx2v canvas cancel CANVAS_ID RUN_ID --json
 ```
 
 Cancel one node and dependent downstream work:
 
 ```bash
-lightx2v workflow cancel-node WORKFLOW_ID RUN_ID NODE_ID --json
+lightx2v canvas cancel-node CANVAS_ID RUN_ID NODE_ID --json
 ```
 
 The single-node response contains `cancelled_node_ids`, which can include dependent nodes in addition to the requested node.
@@ -143,7 +143,7 @@ The single-node response contains `cancelled_node_ids`, which can include depend
 
 - `400`: invalid mode/scope, missing required input, or a node cannot be cancelled.
 - `401` / `403`: missing, expired, or unauthorized API key.
-- `404`: workflow or run is unavailable to this account.
+- `404`: canvas or run is unavailable to this account.
 - `409`: another process claimed the same run.
 - `429`: account concurrency limit reached; retry with backoff.
 - `503` on outputs: output storage is temporarily unavailable; retry without starting a duplicate run.
