@@ -31,7 +31,7 @@ POST /api/v1/billing/quote
 POST /api/v1/task/submit
 GET  /api/v1/task/query?task_id=...
 GET  /api/v1/task/result_url?task_id=...&name=output_image|output_video
-GET/POST workflow discovery and run endpoints
+GET/POST canvas discovery and run endpoints
 ```
 
 Pass `Authorization: Bearer apikey_...`. Read the value from a secret store or environment at execution time. Never generate, print, log, commit, or save a user's key in task output.
@@ -99,4 +99,4 @@ Some model fields accept lists, and multi-role S2V accepts a directory map. The 
 
 ## Workflows
 
-For saved workflows, read `workflow-api.md`. Discover inputs for the same run scope, save `run_id`, and reconnect to status or stream after a timeout instead of starting a duplicate run.
+For saved canvases, read `canvas-api.md`. Discover inputs for the same run scope, save `run_id`, and reconnect to status or stream after a timeout instead of starting a duplicate run.

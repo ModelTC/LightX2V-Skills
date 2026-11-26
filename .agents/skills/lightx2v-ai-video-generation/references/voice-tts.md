@@ -1,6 +1,6 @@
 # LightX2V TTS And Voice Clone
 
-This reference is for agents using LightX2V built-in TTS voices, cloned voices, or workflow `tts` nodes.
+This reference is for agents using LightX2V built-in TTS voices, cloned voices, or canvas `tts` nodes.
 
 ## Authentication
 
@@ -35,8 +35,8 @@ Important response fields:
 | Field | Meaning | Use |
 | --- | --- | --- |
 | `Name` | Human-readable display name | Show to users |
-| `VoiceType` | Built-in voice id | Pass as `--voice-type` or workflow `data.voiceType` |
-| `ResourceID` | TTS resource/version | Pass as `--resource-id` or workflow `data.resourceId` |
+| `VoiceType` | Built-in voice id | Pass as `--voice-type` or canvas `data.voiceType` |
+| `ResourceID` | TTS resource/version | Pass as `--resource-id` or canvas `data.resourceId` |
 | `Gender`, `Age`, `Languages`, `Emotions` | Selection metadata | Filter/select voice |
 
 Rule: keep `VoiceType` paired with the `ResourceID` from the same voice row. Many 2.0 voices require `seed-tts-2.0`; relying on defaults can fail.
@@ -130,9 +130,9 @@ lightx2v voice-clone tts \
 
 Clone TTS output is a WAV file.
 
-## Workflow `tts` Node
+## Canvas `tts` Node
 
-Workflow `tts` converts `in-text` to `out-audio`.
+Canvas `tts` converts `in-text` to `out-audio`.
 
 Ports:
 
@@ -190,7 +190,7 @@ text-input.out-text -> tts.in-context-tone
 tts.out-audio -> avatar-gen.in-audio
 ```
 
-For a digital-human workflow, connect `tts.out-audio` to `avatar-gen.in-audio` and connect a portrait/video input to `avatar-gen.in-image` or `avatar-gen.in-video`.
+For a digital-human canvas, connect `tts.out-audio` to `avatar-gen.in-audio` and connect a portrait/video input to `avatar-gen.in-image` or `avatar-gen.in-video`.
 
 ## Choosing Between Preset And Clone
 
@@ -213,10 +213,10 @@ Do not clone without consent to use the reference voice.
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
 | Built-in TTS fails | Wrong `resource_id` for `voice_type` | Re-run `lightx2v voices --json`; use paired fields |
-| `cloned voice required` in workflow | `voiceTab` indicates clone but `speakerId` is empty | Set `speakerId` or switch to preset fields |
+| `cloned voice required` in canvas | `voiceTab` indicates clone but `speakerId` is empty | Set `speakerId` or switch to preset fields |
 | Clone create succeeds but save fails | Route/key permission or backend whitelist issue | Keep returned `speaker_id`; save later after route is enabled |
 | Clone quality poor | Noisy/short reference or text/audio mismatch | Use clean 5-30s audio and pass matching `--text` |
-| TTS audio generated but avatar fails | `tts.out-audio` not connected to `avatar-gen.in-audio` or avatar visual input missing | Check workflow connections |
+| TTS audio generated but avatar fails | `tts.out-audio` not connected to `avatar-gen.in-audio` or avatar visual input missing | Check canvas connections |
 | Local API call hits proxy | `127.0.0.1` went through proxy | Set `NO_PROXY` and `no_proxy` |
 
 ## Safety

@@ -1,14 +1,14 @@
-# LightX2V Workflow Nodes
+# LightX2V Canvas Nodes
 
-This reference is for agents creating or editing LightX2V workflows from scratch. Use it with `lightx2v workflow create --input @workflow.json` and `lightx2v workflow run ...`.
+This reference is for agents creating or editing LightX2V canvases from scratch. Use it with `lightx2v canvas create --input @canvas.json` and `lightx2v canvas run ...`.
 
-## Workflow JSON Shape
+## Canvas JSON Shape
 
 ```json
 {
   "workflow_id": "NEW-UUID",
-  "name": "Readable workflow name",
-  "description": "What the workflow does",
+  "name": "Readable canvas name",
+  "description": "What the canvas does",
   "visibility": "private",
   "nodes": [
     {
@@ -35,8 +35,8 @@ Rules:
 
 - `workflow_id` must be a real UUID. Generate one; do not use placeholders.
 - Use stable lowercase node ids such as `script_input`, `portrait_input`, `voice_tts`, `avatar_video`.
-- `position` only affects canvas layout, but include it so the workflow opens cleanly.
-- Put default values in Input node `data.value` only when the workflow needs a default. For one run, pass values through `workflow run --inputs`.
+- `position` only affects canvas layout, but include it so the canvas opens cleanly.
+- Put default values in Input node `data.value` only when the canvas needs a default. For one run, pass values through `canvas run --inputs`.
 - Use `model` in node `data` for generation nodes. `model` must be the actual deployed `model_cls`, not a display name.
 - Discover available model classes with `lightx2v models --json`.
 
@@ -54,7 +54,7 @@ Input nodes are the only nodes users should fill at run time.
 Example:
 
 ```bash
-lightx2v workflow run WORKFLOW_ID \
+lightx2v canvas run CANVAS_ID \
   --inputs '{"script_input":"说一段欢迎词"}' \
   --input-file portrait_input=./portrait.png \
   --input-file backing_audio=./speech.wav \
@@ -144,7 +144,7 @@ Example image-to-video node:
 }
 ```
 
-For `video-gen-image-with-audio` multi-keyframes, connect multiple image-producing nodes into `in-image`; the workflow runtime flattens the images. If using direct submit JSON outside workflow, use one wrapper:
+For `video-gen-image-with-audio` multi-keyframes, connect multiple image-producing nodes into `in-image`; the canvas runtime flattens the images. If using direct submit JSON outside canvas, use one wrapper:
 
 ```json
 {
@@ -227,7 +227,7 @@ Generation-node `data` is translated to task submit fields:
 
 Text connected to `in-text` becomes `prompt` for generation nodes. Media connected to `in-image`, `in-audio`, `in-video`, `in-image-start`, or `in-image-end` becomes `input_image`, `input_audio`, `input_video`, or `input_last_frame`.
 
-## Workflow Patterns
+## Canvas Patterns
 
 ### Portrait + Script To Digital Human
 
@@ -302,7 +302,7 @@ Connections:
 
 ## Validation Checklist
 
-Before creating/running a workflow:
+Before creating/running a canvas:
 
 - Every non-input node has all required input ports connected.
 - Port data types match.
@@ -310,5 +310,5 @@ Before creating/running a workflow:
 - TTS preset nodes have both `voiceType` and `resourceId`; clone TTS has `speakerId`.
 - `text-generation.custom_outputs` ids match any downstream `source_port_id` that consumes them.
 - `video-gen-dual-frame` uses `in-image-start` and `in-image-end`, not generic `in-image`.
-- Runtime-only values are passed via `workflow run --inputs` / `--input-file`, not by editing the workflow for one run.
+- Runtime-only values are passed via `canvas run --inputs` / `--input-file`, not by editing the canvas for one run.
 - Localhost runs behind corporate proxies include `NO_PROXY=127.0.0.1,localhost no_proxy=127.0.0.1,localhost`.

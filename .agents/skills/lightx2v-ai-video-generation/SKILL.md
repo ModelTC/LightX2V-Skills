@@ -1,12 +1,14 @@
 ---
 name: lightx2v-ai-video-generation
-description: Use when generating images, videos, digital humans, audio-video clips, TTS speech, cloned voices, or reusable LightX2V workflows from an agent or command line.
+description: Use when generating images, videos, digital humans, audio-video clips, TTS speech, cloned voices, or reusable LightX2V canvases from an agent or command line.
 allowed-tools: Bash(lightx2v *) Bash(curl *) Bash(ffmpeg *) Bash(ffprobe *) Bash(pyannote-audio *) Bash(base64 *) Bash(jq *)
 ---
 
 # LightX2V AI Video Generation
 
-Use the LightX2V CLI or direct HTTP API to submit tasks, poll results, create/run workflows, synthesize speech, and manage cloned voices. The CLI is a convenience layer, not the only supported path.
+Use the LightX2V CLI or direct HTTP API to submit tasks, poll results, create/run canvases, synthesize speech, and manage cloned voices. The CLI is a convenience layer, not the only supported path.
+
+CLI 0.3.4+ uses `lightx2v canvas` as the canonical Canvas command. Check the installed version and service readiness before using new capabilities.
 
 ## Start Here
 
@@ -14,8 +16,8 @@ Use the LightX2V CLI or direct HTTP API to submit tasks, poll results, create/ru
 2. Read the topic page for the requested task. For direct HTTP, read `references/direct-api.md` as the execution checklist.
 3. Query the live model list and task-scoped model specs before choosing a model or parameter. Use `/openapi.json` when exact request or response fields are needed.
 4. Authenticate only when required: use `LIGHTX2V_API_KEY`, `LIGHTX2V_CLOUD_API_KEY`, or `lightx2v login`. Never print, generate, echo, or persist a user's key.
-5. Prefer direct `lightx2v run` for one model task when the CLI is available. Use direct HTTP when requested or when the CLI cannot be installed. Use `lightx2v workflow ...` for multi-node graphs, saved user workflows, or generated TTS -> digital-human pipelines.
-6. Before creating or editing workflow JSON, read `references/workflow-nodes.md`. Before running a saved workflow, read `references/workflow-api.md`.
+5. Prefer direct `lightx2v run` for one model task when the CLI is available. Use direct HTTP when requested or when the CLI cannot be installed. Use `lightx2v canvas ...` for multi-node graphs, saved user canvases, or generated TTS -> digital-human pipelines.
+6. Before creating or editing canvas JSON, read `references/canvas-nodes.md`. Before running a saved canvas, read `references/canvas-api.md`.
 7. Before using TTS or voice clone, read `references/voice-tts.md`. For multi-person or multi-role S2V, read `references/s2v-multi.md`; its user-confirmation gate is mandatory.
 8. Treat signed result URLs as temporary download addresses and keep them out of shared output.
 
@@ -32,13 +34,13 @@ curl -fsSL https://raw.githubusercontent.com/ModelTC/lightx2v-studio-cli/main/in
 | List models | `lightx2v models --json` |
 | Submit one generation task | `lightx2v run TASK/MODEL --prompt "..." ...` |
 | Query/download task | `lightx2v query TASK_ID`, `lightx2v result TASK_ID -o out.mp4` |
-| List owned workflows | `lightx2v workflow list --json` |
-| Inspect/create workflow | `lightx2v workflow get WORKFLOW_ID --json`, `lightx2v workflow create --input @workflow.json --json` |
-| Discover workflow inputs | `lightx2v workflow inputs WORKFLOW_ID --json` |
-| Run workflow | `lightx2v workflow run WORKFLOW_ID --inputs @inputs.json --input-file node_id=./file.png --poll` |
-| Monitor workflow | `lightx2v workflow runs WORKFLOW_ID --status running`, `lightx2v workflow stream WORKFLOW_ID RUN_ID` |
-| Workflow outputs | `lightx2v workflow outputs WORKFLOW_ID RUN_ID --json` |
-| Cancel workflow work | `lightx2v workflow cancel WORKFLOW_ID RUN_ID`, `lightx2v workflow cancel-node WORKFLOW_ID RUN_ID NODE_ID` |
+| List owned canvases | `lightx2v canvas list --json` |
+| Inspect/create canvas | `lightx2v canvas get CANVAS_ID --json`, `lightx2v canvas create --input @canvas.json --json` |
+| Discover canvas inputs | `lightx2v canvas inputs CANVAS_ID --json` |
+| Run canvas | `lightx2v canvas run CANVAS_ID --inputs @inputs.json --input-file node_id=./file.png --poll` |
+| Monitor canvas | `lightx2v canvas runs CANVAS_ID --status running`, `lightx2v canvas stream CANVAS_ID RUN_ID` |
+| Canvas outputs | `lightx2v canvas outputs CANVAS_ID RUN_ID --json` |
+| Cancel canvas work | `lightx2v canvas cancel CANVAS_ID RUN_ID`, `lightx2v canvas cancel-node CANVAS_ID RUN_ID NODE_ID` |
 | TTS | `lightx2v voices`, `lightx2v tts ...`; details in `references/voice-tts.md` |
 | Voice clone | `lightx2v voice-clone create/list/tts/delete ...`; details in `references/voice-tts.md` |
 | Direct HTTP | Read `references/direct-api.md`, then use the live Markdown, model specs, and OpenAPI sources |
@@ -119,18 +121,39 @@ for quote and submit. The server derives the compatible pixel canvas (for exampl
 9:16 768P becomes `[1344, 768]` in `custom_shape`). Do not infer a downgrade from that
 internal size, and do not omit `resolution_level` after quoting it.
 
-## Workflow Basics
+## Public Canvas Editing
 
-For workflow creation/editing details, read `references/workflow-nodes.md`. For the saved-workflow runtime contract and the complete discover -> run -> monitor -> outputs SOP, read `references/workflow-api.md`.
+Check `lightx2v doctor --json` before public Canvas operations. Confirm the protocol,
+service enablement and account access. Use `lightx2v canvas use CANVAS_ID --json`,
+then `lightx2v canvas capabilities --json` for current tools, models, ports and the
+edit schema. Search nodes by stable ID and use typed `canvas node`, `canvas group`
+or `canvas edit` operations rather than replacing an existing graph wholesale.
 
-A workflow is a graph of nodes and connections. Input nodes are special:
+For structured scripts, query `lightx2v canvas script schema --json`,
+`lightx2v canvas script examples --json` and the relevant `canvas script guide`.
+Keep the returned revision, preview the selected shots and ordered anchor inputs,
+and save a generation group before running it. Preparing anchors or groups does
+not start media generation. AI prompt optimization may invoke a model even though
+it does not start video generation.
+
+Retain each write's operation ID and original payload. On unknown outcome, query
+`lightx2v canvas operation get CANVAS_ID OPERATION_ID --kind edit --json` or replay
+the same ID and payload. A timeout does not authorize a new submission. Quote the
+same selected scope before a requested run, wait for that exact run and download
+with `lightx2v canvas download CANVAS_ID --run-id RUN_ID -o DIR --json`.
+
+## Canvas Basics
+
+For canvas creation/editing details, read `references/canvas-nodes.md`. For the saved-canvas runtime contract and the complete discover -> run -> monitor -> outputs SOP, read `references/canvas-api.md`.
+
+A canvas is a graph of nodes and connections. Input nodes are special:
 
 - `text-input` emits `out-text`.
 - `image-input` emits `out-image`.
 - `audio-input` emits `out-audio`.
 - `video-input` emits `out-video`.
 
-Discover required inputs with `workflow inputs` for the same run scope, then pass run-time values with `workflow run --inputs`, keyed by input node id. Do not patch an Input node's stored `data.value` just to run once. Use `--save-as-default` only when changing workflow defaults.
+Discover required inputs with `canvas inputs` for the same run scope, then pass run-time values with `canvas run --inputs`, keyed by input node id. Do not patch an Input node's stored `data.value` just to run once. Use `--save-as-default` only when changing canvas defaults.
 
 Text and URL inputs:
 
@@ -144,7 +167,7 @@ Text and URL inputs:
 Local media files:
 
 ```bash
-lightx2v workflow run WORKFLOW_ID \
+lightx2v canvas run CANVAS_ID \
   --inputs '{"script_input":"大家好，我是 LightX2V 生成的数字人。"}' \
   --input-file portrait_input=./portrait.png \
   --poll
@@ -152,29 +175,29 @@ lightx2v workflow run WORKFLOW_ID \
 
 `--input-file NODE_ID=PATH` is repeatable. The CLI converts local image/audio/video files to `data:<mime>;base64,...`. Values already accepted in `--inputs` include HTTP(S) URLs, `studio:...`, `task:.../output/...`, and data URLs.
 
-## Create A Digital-Human Workflow
+## Create A Digital-Human Canvas
 
-Use this pattern for "make a digital human from portrait + script": `text-input -> tts -> avatar-gen`, plus `image-input -> avatar-gen`. Full node JSON and port rules are in `references/workflow-nodes.md`.
+Use this pattern for "make a digital human from portrait + script": `text-input -> tts -> avatar-gen`, plus `image-input -> avatar-gen`. Full node JSON and port rules are in `references/canvas-nodes.md`.
 
 Create and run:
 
 ```bash
-lightx2v workflow create --input @workflow.json --json
+lightx2v canvas create --input @canvas.json --json
 
-lightx2v workflow run WORKFLOW_ID \
+lightx2v canvas run CANVAS_ID \
   --inputs '{"script_input":"大家好，我是 LightX2V 生成的数字人。祝你今天开心！"}' \
   --input-file portrait_input=./portrait.png \
   --poll \
   --json
 
-lightx2v workflow outputs WORKFLOW_ID RUN_ID --json
+lightx2v canvas outputs CANVAS_ID RUN_ID --json
 ```
 
-If polling times out but status is still `running`, keep the `run_id` and continue with `workflow status`.
+If polling times out but status is still `running`, keep the `run_id` and continue with `canvas status`.
 
 ## TTS And Voice Clone
 
-For full TTS/voice-clone parameters, workflow `tts` node shape, and troubleshooting, read `references/voice-tts.md`.
+For full TTS/voice-clone parameters, canvas `tts` node shape, and troubleshooting, read `references/voice-tts.md`.
 
 List voices first; use `voice_type` and `resource_id` from the same row together.
 
@@ -197,7 +220,7 @@ lightx2v voice-clone tts --speaker-id SPEAKER_ID --text "你好。" -o cloned.wa
 
 ## Key Constraints
 
-- API channel credits may differ from web UI; use `--quote` for expensive jobs.
+- API channel credits may differ from web UI. `run --quote` quotes and then submits; it is not a read-only quote. For independent estimation use `lightx2v canvas quote` and obtain the required task authorization before `canvas run`. A partial quote is not a free remainder.
 - Read current prompt, media, duration, dimension, and conditional parameter limits from the selected task's live model spec. Do not reuse remembered limits.
 - Large media is better as URL input than huge base64 JSON.
 - For `i2v` and `s2v`, assume one primary image unless live model metadata says otherwise.
@@ -212,7 +235,7 @@ lightx2v voice-clone tts --speaker-id SPEAKER_ID --text "你好。" -o cloned.wa
 - Transient connection failures and `5xx`: use limited exponential backoff with jitter. After an uncertain submission outcome, query the existing `task_id`. If no `task_id` was received and the live OpenAPI exposes no idempotency or reconciliation mechanism, do not automatically resubmit; report the unknown outcome for manual verification.
 - Parameter, balance, permission, and content-safety errors: do not retry unchanged. Correct the request or stop.
 - Local `127.0.0.1` request goes through a proxy: set `NO_PROXY=127.0.0.1,localhost no_proxy=127.0.0.1,localhost`.
-- Public/community workflow cannot be run with the account API key: copy or recreate it in the authenticated account first.
-- Workflow run returns before final output: query `lightx2v workflow status WORKFLOW_ID RUN_ID --json`, then `workflow outputs`.
+- Public/community canvas cannot be run with the account API key: copy or recreate it in the authenticated account first.
+- Canvas run returns before final output: query `lightx2v canvas status CANVAS_ID RUN_ID --json`, then `canvas outputs`.
 - TTS fails with a built-in voice: confirm the voice's paired `resource_id` from `lightx2v voices`; see `references/voice-tts.md`.
 - Model name fails: refresh with `lightx2v models --json`; model display names and `model_cls` are not interchangeable.
